@@ -291,6 +291,9 @@ const KIND_NAMES: DeclKind[] = [
   'inductive',
   'ctor',
   'recursor',
+  'instance',
+  'class',
+  'structure',
 ]
 const KIND_INDEX = new Map<string, number>(KIND_NAMES.map((k, i) => [k, i]))
 
@@ -400,6 +403,8 @@ class DeclTable {
     const flags: number[] = []
     const axiomsOf = new Map<NodeId, string[]>()
     const hashes: string[] = []
+    // The package of each module, when the declarations record one.
+    const modulePackage = new Map<number, string>()
 
     // Walked with `indexOf` rather than `split('\n')`: the split materialises a
     // substring per declaration up front, all of which stay alive until the
@@ -419,6 +424,7 @@ class DeclTable {
           moduleIndex.set(parsed.module, module)
         }
         moduleOfList.push(module)
+        if (parsed.package && !modulePackage.has(module)) modulePackage.set(module, parsed.package)
         kinds.push(KIND_INDEX.get(parsed.kind) ?? 0)
         flags.push(
           (parsed.isProp ? FLAG_IS_PROP : 0) |
@@ -462,7 +468,7 @@ class DeclTable {
     const repoIndex = new Map<string, number>()
     const moduleRepo = new Int32Array(moduleList.length)
     for (let i = 0; i < moduleList.length; i++) {
-      const repo = repoOfModule(moduleList[i])
+      const repo = modulePackage.get(i) ?? repoOfModule(moduleList[i])
       let index = repoIndex.get(repo)
       if (index === undefined) {
         index = repoList.length

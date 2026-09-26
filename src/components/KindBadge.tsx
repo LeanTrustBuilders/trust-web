@@ -9,6 +9,9 @@ const SHORT: Record<string, string> = {
   inductive: 'ind',
   ctor: 'ctor',
   recursor: 'rec',
+  instance: 'inst',
+  class: 'class',
+  structure: 'struct',
 }
 
 /** The declaration kind, coloured by whether the declaration carries data. */

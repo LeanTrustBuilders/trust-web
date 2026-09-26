@@ -230,7 +230,10 @@ h1 {
 
 .badge {
   display: inline-block;
-  min-width: 34px;
+  /* Wide enough for STRUCT and CLASS, which an index from a LeanTrustBuilders
+     dataset has; and never squeezed by a long name beside it in a row. */
+  min-width: 44px;
+  flex-shrink: 0;
   padding: 1px 5px;
   border-radius: 4px;
   font-size: 10px;

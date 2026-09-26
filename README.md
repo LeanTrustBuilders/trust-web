@@ -1,5 +1,25 @@
 # trust-web
 
+> **This is the [LeanTrustBuilders](https://github.com/LeanTrustBuilders) fork** of
+> [chrisflav/trust-web](https://github.com/chrisflav/trust-web). It reads the same index, and adds
+> what is needed to read one written from a LeanTrustBuilders dataset by
+> [`trust-site trust-index`](https://github.com/LeanTrustBuilders/site#trusts-front-end-on-the-same-data),
+> whose dependency graph comes from [MeaningGraph](https://github.com/LeanTrustBuilders/meaning-graph)
+> through [trust-extract](https://github.com/LeanTrustBuilders/extractor):
+>
+> - the finer kinds `instance`, `class` and `structure`;
+> - the Lake package of each declaration, which the repository filter then shows;
+> - `trustedPackages` in `marks.json`: packages trusted wholesale, where "up to trusted" stops;
+> - `start` (the declaration shown first) and `declUrl` (a link to each of the library's own
+>   declarations on its site) in `meta.json`;
+> - a build that works under any path (`base: './'`), for GitHub Pages;
+> - build-time switches for a static deployment: `VITE_DEFAULT_INDEX` (the index a first visit
+>   reads), `VITE_TRUST_SERVER=none` (no certificate server) and `VITE_MARKS_API=none` (no marks
+>   API).
+>
+> Every index `trust export` writes reads as before. A live instance, on LeanMachineLearning:
+> <https://leantrustbuilders.github.io/site-pilot/trust/>.
+
 The frontend of [trust](https://github.com/chrisflav/trust): a React application
 for reading what a Lean declaration definitionally rests on, and what rests on
 it.  It walks the dependency graph, renders the declarations themselves, and

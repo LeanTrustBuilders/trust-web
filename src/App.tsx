@@ -58,8 +58,19 @@ const params = new URLSearchParams(window.location.search)
  * a link that names an index means that index, a reader who has chosen one is
  * not asked again, and a first visit is asked rather than guessed at.
  */
-const LOCATION = locationFromParams(params) ?? sessionLocation()
-const INITIAL_DECL = params.get('decl') ?? 'Nat.gcd'
+/**
+ * A deployment that serves one index of its own can name it at build time
+ * (`VITE_DEFAULT_INDEX`), and a first visit then reads it rather than asking.
+ */
+const DEFAULT_INDEX = (import.meta as unknown as { env?: Record<string, string | undefined> }).env
+  ?.VITE_DEFAULT_INDEX
+const LOCATION =
+  locationFromParams(params) ??
+  sessionLocation() ??
+  (DEFAULT_INDEX ? { kind: 'local' as const, name: DEFAULT_INDEX } : null)
+/** The declaration the address names; failing that, the index's own `start`. */
+const NAMED_DECL = params.get('decl')
+const INITIAL_DECL = NAMED_DECL ?? 'Nat.gcd'
 const INITIAL_DIRECTION: Direction = params.get('dir') === 'dependents' ? 'dependents' : 'dependencies'
 const INITIAL_DEPTH = Number(params.get('depth') ?? 2)
 const INITIAL_REPOS = reposFromParams(params)
@@ -207,7 +218,9 @@ export function App() {
         setSessionLocation(LOCATION)
         // Prefer an exact name: `?decl=Eq` must land on `Eq`, not on some
         // longer declaration that merely contains it.
-        const initial = loaded.findByName(INITIAL_DECL) ?? loaded.search(INITIAL_DECL, 1)[0]?.id
+        const wanted = NAMED_DECL ?? loaded.meta().start ?? INITIAL_DECL
+        if (wanted !== INITIAL_DECL) setQuery(wanted)
+        const initial = loaded.findByName(wanted) ?? loaded.search(wanted, 1)[0]?.id
         if (initial !== undefined && initial !== null) {
           setRoot(initial)
           setSelected(initial)
@@ -393,6 +406,7 @@ export function App() {
     (id: NodeId) => {
       if (!source) return false
       if (marks.trusted.has(source.node(id)?.name)) return true
+      if (marks.marks.trustedPackages?.includes(source.repoOf(id))) return true
       if (federated.size === 0) return false
       const hash = source.hashOf(id)
       return hash.length > 0 && federated.has(hash)
@@ -874,7 +888,17 @@ export function App() {
                   <KindBadge decl={rootDecl} />
                   <h2>{rootDecl.name}</h2>
                 </div>
-                <div className="decl-module">{rootDecl.module}</div>
+                <div className="decl-module">
+                  {rootDecl.module}
+                  {meta.declUrl && source.repoOf(root) === meta.source?.package && (
+                    <>
+                      {' · '}
+                      <a href={meta.declUrl.replace('{name}', encodeURIComponent(rootDecl.name))}>
+                        its page on the library's site
+                      </a>
+                    </>
+                  )}
+                </div>
                 <div className="decl-flags">
                   <span className={rootDecl.isData ? 'flag data' : 'flag prop'}>
                     {rootDecl.isData ? 'data-carrying' : 'proof'}
@@ -897,7 +921,7 @@ export function App() {
                       {/* An inductive's body is its constructor list, which Lean
                           introduces with `where`, not with `:=`. */}
                       <div className="code-sep">
-                        {rootDecl.kind === 'inductive' ? 'where' : ':='}
+                        {['inductive', 'structure', 'class'].includes(rootDecl.kind) ? 'where' : ':='}
                       </div>
                       <CodeView block={code.value} onSelectName={focusName} isKnown={isKnown} />
                     </>

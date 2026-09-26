@@ -19,6 +19,8 @@ permissions:
 
 jobs:
   image:
+    # Upstream's image; a fork does not publish one.
+    if: github.repository == 'chrisflav/trust-web'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

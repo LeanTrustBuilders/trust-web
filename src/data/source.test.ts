@@ -47,6 +47,26 @@ const edges = ['{"src":0,"tgt":1}', '{"src":0,"tgt":2}', '{"src":1,"tgt":3}', '{
 // must never be followed.
 const bodyEdges = ['{"src":0,"tgt":3}', '{"src":3,"tgt":1}'].join('\n')
 
+describe('an index made from a LeanTrustBuilders dataset', () => {
+  // Packages and the finer kinds, as `trust-site trust-index` writes them.
+  const rows = [
+    { id: 0, name: 'Lib.foo', module: 'Lib.Basic', package: 'Lib', kind: 'instance', isProp: false, isData: true },
+    { id: 1, name: 'Measure', module: 'Mathlib.Measure', package: 'mathlib', kind: 'structure', isProp: false, isData: true },
+    { id: 2, name: 'Nat', module: 'Init.Prelude', package: 'lean4', kind: 'inductive', isProp: false, isData: true },
+    { id: 3, name: 'Batteries.x', module: 'Batteries.X', package: 'batteries', kind: 'class', isProp: false, isData: true },
+  ]
+  const source = StaticIndexSource.fromText(meta, rows.map((r) => JSON.stringify(r)).join('\n'), '')
+
+  it('shows packages as the repositories', () => {
+    expect(source.repos()).toEqual(['Lib', 'batteries', 'lean4', 'mathlib'])
+    expect(source.repoOf(1)).toBe('mathlib')
+  })
+
+  it('keeps the finer kinds', () => {
+    expect([0, 1, 2, 3].map((id) => source.node(id).kind)).toEqual(['instance', 'structure', 'inductive', 'class'])
+  })
+})
+
 describe('StaticIndexSource', () => {
   const source = StaticIndexSource.fromText(meta, decls, edges)
 

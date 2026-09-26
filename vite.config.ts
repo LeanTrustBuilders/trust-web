@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  // Relative asset and index paths, so that a build works wherever it is put —
+  // at a domain's root or under a GitHub Pages project path.
+  base: './',
   server: {
     // Marks are read and written by Lean rather than by this dev server:
     // `trust serve-marks` owns `trust-marks.json` — it is the side that can

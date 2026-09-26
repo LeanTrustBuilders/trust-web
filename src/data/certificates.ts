@@ -240,6 +240,9 @@ export interface Identity {
 export const DEFAULT_SERVER = (() => {
   const baked = (import.meta as unknown as { env?: Record<string, string | undefined> }).env
     ?.VITE_TRUST_SERVER
+  // `none` turns the certificate features off: a static deployment with no
+  // node behind it, where asking its own origin would only collect 404s.
+  if (baked === 'none') return ''
   if (baked) return baked.replace(/\/+$/, '')
   return typeof window === 'undefined' ? '' : window.location.origin
 })()

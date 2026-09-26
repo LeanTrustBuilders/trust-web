@@ -26,8 +26,14 @@ export interface MarksIndex {
   editable: boolean
 }
 
-/** The API the dev server exposes; absent from a static deployment. */
-const MARKS_API = '/api/marks'
+/**
+ * The API the dev server exposes; absent from a static deployment, which can
+ * say so at build time (`VITE_MARKS_API=none`) rather than ask for it.
+ */
+const MARKS_API: string | null = (() => {
+  const baked = (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.VITE_MARKS_API
+  return baked === 'none' ? null : baked || '/api/marks'
+})()
 
 export const emptyMarks: Marks = {
   version: 1,
@@ -47,6 +53,7 @@ function parseMarks(value: unknown): Marks {
       ? (raw.characterizations as Characterization[])
       : [],
     protectedDecls: Array.isArray(raw.protected) ? (raw.protected as ProtectedMark[]) : [],
+    trustedPackages: Array.isArray(raw.trustedPackages) ? (raw.trustedPackages as string[]) : undefined,
   }
 }
 
@@ -65,6 +72,7 @@ export function serializeMarks(marks: Marks): unknown {
     trusted: marks.trusted,
     characterizations: marks.characterizations,
     protected: marks.protectedDecls.map((entry) => ({ name: entry.name, note: entry.note })),
+    ...(marks.trustedPackages ? { trustedPackages: marks.trustedPackages } : {}),
   }
 }
 
@@ -91,7 +99,10 @@ export function indexMarks(marks: Marks, editable: boolean): MarksIndex {
 
 /** Load the marks for an index, from the dev API when it is available. */
 export async function loadMarks(base: string): Promise<MarksIndex> {
-  const [live, exported] = await Promise.all([fetchJson(MARKS_API), fetchJson(`${base}/marks.json`)])
+  const [live, exported] = await Promise.all([
+    MARKS_API ? fetchJson(MARKS_API) : Promise.resolve(null),
+    fetchJson(`${base}/marks.json`),
+  ])
   if (live === null) {
     // Static deployment: the exported file is all there is, and it cannot be edited.
     return indexMarks(exported === null ? emptyMarks : parseMarks(exported), false)
@@ -111,6 +122,7 @@ export async function loadMarks(base: string): Promise<MarksIndex> {
 
 /** Persist marks through the dev API.  Throws when it is not available. */
 export async function saveMarks(marks: Marks): Promise<void> {
+  if (!MARKS_API) throw new Error('this deployment has no marks API')
   const response = await fetch(MARKS_API, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

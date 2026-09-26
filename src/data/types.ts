@@ -9,6 +9,10 @@ export type DeclKind =
   | 'inductive'
   | 'ctor'
   | 'recursor'
+  // Finer kinds an index made from a LeanTrustBuilders dataset carries.
+  | 'instance'
+  | 'class'
+  | 'structure'
 
 export type EdgeKind = 'statement' | 'body'
 
@@ -25,6 +29,13 @@ export interface Decl {
   usesSorry?: boolean
   /** Semantic hash, when the index was exported with `--with-hashes`. */
   hash?: string
+  /**
+   * The Lake package the declaration comes from, when the index records it (an
+   * index made from a LeanTrustBuilders dataset does).  It is then what the
+   * repository filter shows, rather than a guess from the module's first
+   * component.
+   */
+  package?: string
 }
 
 export interface Edge {
@@ -116,6 +127,12 @@ export interface Marks {
   trusted: TrustMark[]
   characterizations: Characterization[]
   protectedDecls: ProtectedMark[]
+  /**
+   * Repositories trusted wholesale: every declaration of one counts as trusted.
+   * What an index made from a LeanTrustBuilders dataset carries for the
+   * packages its site treats as audited (Lean core, Mathlib, …).
+   */
+  trustedPackages?: string[]
 }
 
 export interface IndexMeta {
@@ -141,4 +158,19 @@ export interface IndexMeta {
   /** Which hasher produced the declaration hashes; certificates must match it. */
   hasher?: string
   codeShardSize?: number
+  /** The declaration to show when the address names none. */
+  start?: string
+  /** A page about each of the library's own declarations, `{name}` standing for its name. */
+  declUrl?: string
+  /** Where an index made from a LeanTrustBuilders dataset came from. */
+  source?: {
+    dataset?: string
+    producer?: string
+    library?: string
+    /** Which notion the body edges are: `term` (trust's) or `meaning`. */
+    body?: string
+    upstreamClosure?: { follow: string; display: string } | null
+    /** The library's own package: the declarations `declUrl` has a page for. */
+    package?: string
+  }
 }

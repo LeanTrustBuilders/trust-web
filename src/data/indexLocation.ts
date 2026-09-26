@@ -52,7 +52,18 @@ const RAW = 'https://raw.githubusercontent.com'
 const RELEASE = '/release'
 
 /** Indexes served beside this bundle, as the deployment's nginx mounts them. */
-const LOCAL_BASE = '/index'
+/**
+ * Where a deployment's own indexes are: `index/` beside the page.
+ *
+ * Resolved against the page here, once.  A build with a relative base (for a
+ * GitHub Pages project path) would otherwise hand the index worker a relative
+ * URL, which the worker resolves against its own script under `assets/`.
+ */
+const LOCAL_BASE = (() => {
+  const base = `${(import.meta as unknown as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '/'}index`
+  if (typeof document === 'undefined') return base
+  return new URL(base, document.baseURI).href
+})()
 
 /**
  * The branch `chrisflav/trust-action` pushes an index to.
