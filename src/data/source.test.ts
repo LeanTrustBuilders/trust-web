@@ -48,7 +48,7 @@ const edges = ['{"src":0,"tgt":1}', '{"src":0,"tgt":2}', '{"src":1,"tgt":3}', '{
 const bodyEdges = ['{"src":0,"tgt":3}', '{"src":3,"tgt":1}'].join('\n')
 
 describe('an index made from a LeanTrustBuilders dataset', () => {
-  // Packages and the finer kinds, as `trust-site trust-index` writes them.
+  // Packages and the finer kinds, as `referee-site trust-index` writes them.
   const rows = [
     { id: 0, name: 'Lib.foo', module: 'Lib.Basic', package: 'Lib', kind: 'instance', isProp: false, isData: true },
     { id: 1, name: 'Measure', module: 'Mathlib.Measure', package: 'mathlib', kind: 'structure', isProp: false, isData: true },

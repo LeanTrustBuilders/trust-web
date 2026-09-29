@@ -3,7 +3,7 @@
 > **This is the [LeanTrustBuilders](https://github.com/LeanTrustBuilders) fork** of
 > [chrisflav/trust-web](https://github.com/chrisflav/trust-web). It reads the same index, and adds
 > what is needed to read one written from a LeanTrustBuilders dataset by
-> [`trust-site trust-index`](https://github.com/LeanTrustBuilders/referee-site#trusts-front-end-on-the-same-data),
+> [`referee-site trust-index`](https://github.com/LeanTrustBuilders/referee-site#trusts-front-end-on-the-same-data),
 > whose dependency graph comes from [MeaningGraph](https://github.com/LeanTrustBuilders/meaning-graph)
 > through [trust-extract](https://github.com/LeanTrustBuilders/extractor):
 >
